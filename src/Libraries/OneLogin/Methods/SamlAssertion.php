@@ -70,8 +70,8 @@ class SamlAssertion implements Method {
                                 }
 
                                 $responseData = $response->getJson()->data[0];
-                                if (\OneVPN\OpenVPNAuth::MFA_AUTH_REQUIRED === true) {
-                                    return VerifyFactor::request(self::$apiToken, $responseData->devices[0]->device_id, $responseData->state_token, \OneVPN\OpenVPNAuth::getAuthArgs()->getMFACode());
+                                if (\OneVPN\Authorize::MFA_AUTH_REQUIRED === true) {
+                                    return VerifyFactor::request(self::$apiToken, $responseData->devices[0]->device_id, $responseData->state_token, \OneVPN\Authorize::getAuthArgs()->getMFACode());
                                 } else {
                                     return true;
                                 }
