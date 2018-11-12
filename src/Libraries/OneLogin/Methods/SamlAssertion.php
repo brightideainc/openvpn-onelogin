@@ -54,7 +54,8 @@ class SamlAssertion implements Method {
      * Undocumented function
      *
      * @param Response $response
-     * @return void
+     * @return bool|void
+     * @throws ApiException
      */
     public static function handle(Response $response) {
         switch ($response->getStatusCode()) {
@@ -71,7 +72,19 @@ class SamlAssertion implements Method {
 
                                 $responseData = $response->getJson()->data[0];
                                 if (\OneVPN\Authorize::MFA_AUTH_REQUIRED === true) {
-                                    return VerifyFactor::request(self::$apiToken, $responseData->devices[0]->device_id, $responseData->state_token, \OneVPN\Authorize::getAuthArgs()->getMFACode());
+                                    $mfaVerify = false;
+                                    foreach($responseData->devices as $device) {
+                                        $mfaVerify = VerifyFactor::request(self::$apiToken, $device->device_id, $responseData->state_token, \OneVPN\Authorize::getAuthArgs()->getMFACode());
+                                        if($mfaVerify === true) {
+                                            return true;
+                                        }
+                                    }
+                                    if(\is_array($mfaVerify)) {
+                                       throw new ApiException($mfaVerify['message'], $mfaVerify['statusCode']);
+                                    }
+
+                                    throw new ApiException('Invalid MFA');
+
                                 } else {
                                     return true;
                                 }

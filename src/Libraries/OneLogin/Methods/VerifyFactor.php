@@ -24,7 +24,7 @@ class VerifyFactor implements Method {
      * @param [type] $deviceId
      * @param [type] $stateToken
      * @param [type] $otpToken
-     * @return void
+     * @return array|bool|void
      */
     public static function request(string $apiToken = null, $deviceId = null, $stateToken = null, $otpToken = null) {
         return self::handle(Response::fromGuzzle((new Client)->request('POST', self::ENDPOINT_URL, [
@@ -46,14 +46,14 @@ class VerifyFactor implements Method {
      * Undocumented function
      *
      * @param Response $response
-     * @return void
+     * @return array|bool
      */
     public static function handle(Response $response) {        
         switch ($response->getStatusCode()) {
             case 200:
                 return $response->getJson()->status->message === 'Success';
             default:
-                throw new ApiException($response->getJson()->status->message, $response->getStatusCode());
+                return ['message' => $response->getJson()->status->message, 'statusCode' =>  $response->getStatusCode()];
         }
     }
 }
